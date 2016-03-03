@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<title>
+			TESTY
+		</title>
+		
+		<script src="lib/primus/primus.js"></script>
+		<script type="text/javascript">
+			function WebSocketTest()
+			{
+				var primus = Primus.connect()
+
+				primus.on("open", function () {
+					console.log("OPENY MESSAGE!")
+				})
+
+				primus.on("data", function (data) {
+					console.log("GETTY MESSAGE");
+					console.log("data =", data)
+				})
+			}
+		</script>
+	</head>
+	<body>
+		Hey yo
+		<div id="sse">
+			<a href="javascript:WebSocketTest()">TESTY TEST</a>
+		</div>
+	</body>
+</html>

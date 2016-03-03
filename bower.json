@@ -1,0 +1,25 @@
+{
+  "name": "anonachat",
+  "description": "Anonymous chat web application",
+  "main": "",
+  "authors": [
+    "bdzevel"
+  ],
+  "license": "MIT",
+  "moduleType": [
+    "node"
+  ],
+  "dependencies": {
+    "primus": "~5.0.0"
+  },
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/lib",
+    "test",
+    "tests"
+  ],
+  "exportsOverride": {}
+}

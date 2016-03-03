@@ -3,26 +3,57 @@
 let TS = require("../diagnostics/trace-sources").Get("Web-Server");
 
 let env = require("../config/environment");
-let sslEnabled = env.get("SSL_ENABLED");
 
 let server = InitializeServer();
-const port = process.env.PORT || env.get("PORT") || 3000;
-
-TS.TraceVerbose(__filename, "Starting web server on port " + port);
-
-server.listen(port);
 server.on("error", OnError);
+
+let options =
+{
+	transformer: "engine.io",
+	port: process.env.PORT || env.get("PORT") || 3000
+};
+
+TS.TraceVerbose(__filename, "Starting web server on port " + options.port);
+
+let Primus = require("primus");
+var primus = new Primus(server, options);
+primus.on("connection", function (spark) {
+	console.log(">>> connection");
+	console.log(spark);
+	console.log(">>> /connection");
+});
+primus.on("data", function message(data) {
+	console.log('>>> data');
+	console.log(data);
+	console.log('>>> /data');
+});
+primus.on("disconnection", function (spark) {
+	console.log(">>> disconnection");
+	console.log(spark);
+	console.log(">>> /disconnection");
+});
+primus.on("end", function (spark) {
+	console.log('>>> end');
+	console.log(spark);
+	console.log('>>> /end');
+});
+primus.on("error", OnError);
+
+server.listen(options.port);
 
 TS.TraceVerbose(__filename, "Started web server");
 
+//primus.save(__dirname + "/primus.js");
+
 function InitializeServer()
 {
-	if (sslEnabled === "0")
+	let sslEnabled = env.get("SSL_ENABLED");
+	if (sslEnabled === 0)
 	{
 		let server = require("./http-server");
 		return server;
 	}
-	else if (sslEnabled === "1")
+	else if (sslEnabled === 1)
 	{
 		let server = require("./https-server");
 		return server;
@@ -39,9 +70,9 @@ function OnError(error)
 		throw error;
 	}
 
-	var bind = typeof port === "string"
-		? "Pipe " + port
-		: "Port " + port;
+	var bind = typeof options.port === "string"
+		? "Pipe " + options.port
+		: "Port " + options.port;
 
 	// handle specific listen errors with friendly messages
 	switch (error.code)

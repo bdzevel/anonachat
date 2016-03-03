@@ -13,8 +13,8 @@ app.use(logger("dev"));
 let bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-// let path = require("path");
-// app.use(express.static(path.join(__dirname, "..", "public")));
+let path = require("path");
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Front end
 // app.get("/", function (req, res) { res.sendFile("index.html"); });
