@@ -1,8 +1,8 @@
 "use strict";
 
 let User = require("./user");
-let nouns  = require("../../words/nouns");
-let adjectives = require("../../words/adjectives");
+let nouns  = require("../words/nouns");
+let adjectives = require("../words/adjectives");
 
 class UserCollection extends Array
 {
@@ -11,21 +11,23 @@ class UserCollection extends Array
 		this.CurrentID = 0;
 	}
 	
-	push(...items)
+	push()
 	{
-		for (let item of items)
+		if (!arguments)
+			throw "Argument Null";
+		for (let item of arguments)
 		{
 			if (!(item instanceof User))
 				throw "Argument not of type 'User'";
 			if (this.containsID(item.ID))
 				throw "Collection already contains item with ID '" + item.ID + "'";
 		}
-		return super.push(items);
+		return super.push(arguments);
 	}
 	
 	remove(user)
 	{
-		var index = this.indexOf(user);
+		let index = this.indexOf(user);
 		if (index == -1)
 			return;
 		// Free up this ID
@@ -36,17 +38,18 @@ class UserCollection extends Array
 	
 	newUser()
 	{
-		var id = this.generateUnusedID();
-		var name = this.generateUnusedName();
-		var user = new User(id, name);
+		let id = this.generateUnusedID();
+		let name = this.generateUnusedName();
+		let user = new User(id, name);
 		this.push(user);
 		return user;
 	}
 	
 	generateUnusedID()
 	{
-		var id = this.CurrentID;
-		while (this.containsID(++this.CurrentID)) ;
+		let id = this.CurrentID;
+		while (this.containsID(++this.CurrentID))
+			id = this.CurrentID;
 		return id;
 	}
 	

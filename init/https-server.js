@@ -5,7 +5,7 @@ let TS = require("../diagnostics/trace-sources").Get("Web-Server");
 TS.TraceVerbose(__filename, "Initializing HTTPS server...");
 
 let https = require("https");
-let handlers = require("./request-handlers");
+let handlers = require("../handlers/http-requests");
 
 // These file reads used to be "Promisified" and "Async" but
 //	redesign of the structure caused some issues, and

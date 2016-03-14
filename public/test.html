@@ -8,16 +8,16 @@
 		<script type="text/javascript">
 			function WebSocketTest()
 			{
-				var primus = Primus.connect()
+				var primus = Primus.connect("ws://localhost:3000/api/authentication");
 
 				primus.on("open", function () {
 					console.log("OPENY MESSAGE!")
-				})
+				});
 
 				primus.on("data", function (data) {
 					console.log("GETTY MESSAGE");
 					console.log("data =", data)
-				})
+				});
 			}
 		</script>
 	</head>

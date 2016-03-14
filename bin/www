@@ -2,4 +2,4 @@
 
 // ROOT/bin
 
-require("../init/server");
+require("../init/services");

@@ -3,64 +3,36 @@
 let TS = require("../diagnostics/trace-sources").Get("Web-Server");
 
 let env = require("../config/environment");
+const port = process.env.PORT || env.get("PORT") || 3000;
 
 let server = InitializeServer();
-server.on("error", OnError);
+let primus = require("./ws-endpoint")(server);
 
-let options =
-{
-	transformer: "engine.io",
-	port: process.env.PORT || env.get("PORT") || 3000
-};
+TS.TraceVerbose(__filename, "Starting web server on port " + port);
 
-TS.TraceVerbose(__filename, "Starting web server on port " + options.port);
-
-let Primus = require("primus");
-var primus = new Primus(server, options);
-primus.on("connection", function (spark) {
-	console.log(">>> connection");
-	console.log(spark);
-	console.log(">>> /connection");
-});
-primus.on("data", function message(data) {
-	console.log('>>> data');
-	console.log(data);
-	console.log('>>> /data');
-});
-primus.on("disconnection", function (spark) {
-	console.log(">>> disconnection");
-	console.log(spark);
-	console.log(">>> /disconnection");
-});
-primus.on("end", function (spark) {
-	console.log('>>> end');
-	console.log(spark);
-	console.log('>>> /end');
-});
-primus.on("error", OnError);
-
-server.listen(options.port);
+server.listen(port);
 
 TS.TraceVerbose(__filename, "Started web server");
 
-//primus.save(__dirname + "/primus.js");
-
 function InitializeServer()
 {
+	let server = { };
 	let sslEnabled = env.get("SSL_ENABLED");
 	if (sslEnabled === 0)
 	{
-		let server = require("./http-server");
-		return server;
+		server = require("./http-server");
 	}
 	else if (sslEnabled === 1)
 	{
-		let server = require("./https-server");
-		return server;
+		server = require("./https-server");
 	}
-	
-	TS.TraceError(__filename, "SSL_ENABLED option must be either '0' or '1'");
-	process.exit(2);
+	else
+	{
+		TS.TraceError(__filename, "SSL_ENABLED option must be either '0' or '1'");
+		process.exit(2);
+	}
+	server.on("error", OnError);
+	return server;
 }
 
 function OnError(error)
@@ -70,9 +42,9 @@ function OnError(error)
 		throw error;
 	}
 
-	var bind = typeof options.port === "string"
-		? "Pipe " + options.port
-		: "Port " + options.port;
+	var bind = typeof port === "string"
+		? "Pipe " + port
+		: "Port " + port;
 
 	// handle specific listen errors with friendly messages
 	switch (error.code)
