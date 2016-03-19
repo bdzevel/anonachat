@@ -1,8 +1,9 @@
 "use strict";
 
-let TS = require("../diagnostics/trace-sources").Get("Command-Service");
+let TS = require("../../diagnostics/trace-sources").Get("Command-Service");
 
-let Command = require("../../commands/command");
+let Command = require("./command");
+let Response = require("./response");
 let CommandHandler = require("./command-handler");
 
 class CommandService
@@ -16,20 +17,46 @@ class CommandService
 	
 	initialize()
 	{
-		this.CommandHandlers = [ ];
+		this.commandHandlers = [ ];
 	}
 	
-	register(symbol, callback)
+	register(symbol, service, callback)
 	{
-		let handler = new CommandHandler(symbol, callback);
-		this.CommandHandlers.push(handler);
+		if (this.isCommandRegistered(symbol))
+		{
+			TS.TraceError(__filename, "Command '" + symbol + "' already registered");
+			return;
+		}
+		let handler = new CommandHandler(symbol, service, callback);
+		this.commandHandlers.push(handler);
 	}
 	
-	invoke(command)
+	invoke(command, context)
 	{
 		if (!(command instanceof Command))
 			throw "Invalid argument type for 'command'";
-		this.CommandHandlers.forEach(function(handler, index) { if (handler.Symbol === command.Symbol) handler.callback(command); })
+		let handler = this.getHandler(command.Symbol);
+		if (!handler)
+		{
+			TS.TraceVerbose(__filename, "No handler registered for command '" + command.Symbol + "'");
+			return;
+		}
+		let response = handler.Callback.call(handler.Service, command, context);
+		if (response)
+			context.write(response);
+	}
+	
+	isCommandRegistered(symbol)
+	{
+		if (this.getHandler(symbol))
+			return true;
+		return false;
+	}
+	
+	getHandler(symbol)
+	{
+		let cmd = this.commandHandlers.find(function(cmd) { return cmd.Symbol === symbol; });
+		return cmd;
 	}
 }
 

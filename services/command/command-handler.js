@@ -2,9 +2,10 @@
 
 class CommandHandler
 {
-	constructor(symbol, callback)
+	constructor(symbol, service, callback)
 	{
 		this.Symbol = symbol;
+		this.Service = service;
 		this.Callback = callback;
 	}
 }

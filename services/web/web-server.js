@@ -1,6 +1,9 @@
 "use strict";
 
-let TS = require("../diagnostics/trace-sources").Get("Web-Server");
+let TS = require("../../diagnostics/trace-sources").Get("Web-Server");
+
+let Command = require("../command/command");
+let ClientProxy = require("./client-proxy");
 
 class WebServer
 {
@@ -13,14 +16,16 @@ class WebServer
 	
 	initialize()
 	{
-		this.configurationService = require("../configuration/configuration-service");
-		initializeWebServer();
+		this.commandService = require("../command/command-service");
+		this.initializeWebServer();
+        this.initializeWebSocketListener();
 	}
 	
 	initializeWebServer()
 	{
 		this.webServer = { };
-		let sslEnabled = this.configurationService.get("SSL_ENABLED");
+		let configurationService = require("../configuration/configuration-service");
+		let sslEnabled = configurationService.get("SSL_ENABLED");
 		if (sslEnabled === 0)
 		{
 			this.webServer = this.setupHttp();
@@ -34,9 +39,7 @@ class WebServer
 			TS.TraceError(__filename, "SSL_ENABLED option must be either '0' or '1'");
 			process.exit(2);
 		}
-		server.on("error", OnError);
-		let primus = require("./ws-endpoint")(server);
-		return server;
+		this.webServer.on("error", this.onError);
 	}
 	
 	setupHttp()
@@ -44,10 +47,10 @@ class WebServer
 		TS.TraceVerbose(__filename, "Initializing HTTP server...");
 
 		let http = require("http");
-		let handlers = this.setupHandlers();
+		let handlers = this.setupHttpHandlers();
 		let server = http.createServer(handlers);
 
-		TS.TraceVerbose(__filename, "HTTP server initialized");
+		TS.TraceVerbose(__filename, "Finished initializing HTTP server");
 		
 		return server;
 	}
@@ -57,7 +60,7 @@ class WebServer
 		TS.TraceVerbose(__filename, "Initializing HTTPS server...");
 
 		let https = require("https");
-		let handlers = this.setupHandlers();
+		let handlers = this.setupHttpHandlers();
 
 		// These file reads used to be "Promisified" and "Async" but
 		//	redesign of the structure caused some issues, and
@@ -71,7 +74,7 @@ class WebServer
 		};
 		let server = https.createServer(httpsOptions, handlers);
 
-		TS.TraceVerbose(__filename, "HTTPS server initialized");
+		TS.TraceVerbose(__filename, "Finished initializing HTTPS server");
 		
 		return server;
 	}
@@ -90,7 +93,7 @@ class WebServer
 		app.use(bodyParser.json());
 
 		let path = require("path");
-		app.use(express.static(path.join(__dirname, "..", "public")));
+		app.use(express.static(path.join(__dirname, "..", "..", "public")));
 
 		// Catch 404 and forward to error handler
 		app.use(function (req, res, next)
@@ -106,64 +109,73 @@ class WebServer
 			res.status(err.status || 500).send({ error: err.message });
 		});
 
-		TS.TraceVerbose(__filename, "HTTP request handlers initialized");
+		TS.TraceVerbose(__filename, "Finished initializing HTTP request handlers");
 		
 		return app;
 	}
 	
+	initializeWebSocketListener()
+	{
+		TS.TraceVerbose(__filename, "Initializing web socket listener...");
+		let Primus = require("primus");
+		this.webSocketListener = new Primus(this.webServer, { transformer: "engine.io" });
+		this.setupWebSocketHandlers();
+		TS.TraceVerbose(__filename, "Finished initializing web socket listener...");
+	}
+
+	setupWebSocketHandlers()
+	{
+		this.webSocketListener.on("connection", this.onConnect);
+		this.webSocketListener.on("disconnection", this.onDisconnect);
+	}
+	
 	start()
 	{
+		let configurationService = require("../configuration/configuration-service");
+		const port = configurationService.get("PORT");
 		TS.TraceVerbose(__filename, "Starting web server on port " + port);
-
-		const port = this.configurationService.get("PORT");
-		server.listen(port);
-
+		this.webServer.listen(port);
 		TS.TraceVerbose(__filename, "Started web server");
 	}
 	
-	InitializeWebSocketEndpoint(server)
+	onConnect(spark)
 	{
-		TS.TraceVerbose(__filename, "Initializing HTTP server...");
-		let Primus = require("primus");
-		let primus = new Primus(server, { transformer: "engine.io" });
-		require("../handlers/web-sockets")(primus);
-		//primus.save(__dirname + "/primus.js");
-		return primus;
-	}
-
-	SetupWebSocketHandlers(primus)
-	{
-		primus.on("connection", function (spark) {
-			console.log(">>> connection");
-			console.log(spark);
-			spark.write("HELLOY MESSAGE");
-			console.log(">>> /connection");
-		});
-		primus.on("disconnection", function (spark) {
-			console.log(">>> disconnection");
-			console.log(spark);
-			console.log(">>> /disconnection");
-		});
-		primus.on("end", function (spark) {
-			console.log('>>> end');
-			console.log(spark);
-			console.log('>>> /end');
-		});
-		primus.on("data", function message(data) {
-			console.log('>>> data');
-			console.log(data);
-			console.log('>>> /data');
+		let commandService = require("../command/command-service");
+		
+		let cmd = new Command("CONNECT");
+		let proxy = new ClientProxy(spark);
+		commandService.invoke(cmd, proxy);
+		spark.on('data', function(data) {
+			if (!data.Command)
+			{
+				TS.TraceError(__filename, "Data received, but no command specified");
+				return;
+			}
+			let cmd = Command.fromJSON(data.Command);
+			commandService.invoke(cmd, proxy);
 		});
 	}
+	
+	onDisconnect(spark)
+	{
+		let chatService = require("../chat/chat-service");
+		let commandService = require("../command/command-service");
+		
+		let cmd = new Command("DISCONNECT");
+		let proxy = chatService.findClient(spark.id);
+		commandService.invoke(cmd, proxy);
+	}
 
-	OnError(error)
+	onError(error)
 	{
 		if (error.syscall !== "listen")
 		{
 			throw error;
 		}
 
-		var bind = typeof port === "string"
+		let configurationService = require("../configuration/configuration-service");
+		let port = configurationService.get("PORT");
+		let bind = typeof port === "string"
 			? "Pipe " + port
 			: "Port " + port;
 

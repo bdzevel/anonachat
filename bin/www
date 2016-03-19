@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
-// ROOT/bin
+"use strict";
 
 require("../init/services");

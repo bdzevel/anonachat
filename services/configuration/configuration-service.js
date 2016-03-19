@@ -1,6 +1,6 @@
 "use strict";
 
-let TS = require("../diagnostics/trace-sources").Get("Configuration-Service");
+let TS = require("../../diagnostics/trace-sources").Get("Configuration-Service");
 
 class ConfigurationService
 {
@@ -15,19 +15,17 @@ class ConfigurationService
 	{
 		let Habitat = require("habitat");
 		Habitat.load('.env');
-		this.Properties = new Habitat("ANONACHAT");
-		if (!this.Properties.get("PORT"))
-			this.Properties.set("PORT", 3000);
+		this.properties = new Habitat("ANONACHAT");
 	}
 	
 	get(property)
 	{
-		return this.Properties.get(property);
+		return this.properties.get(property);
 	}
 	
 	set(name, value)
 	{
-		this.Properties.set(name, value);
+		this.properties.set(name, value);
 	}
 }
 

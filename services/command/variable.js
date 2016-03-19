@@ -1,6 +1,6 @@
 "use strict";
 
-class CommandArgument
+class Variable
 {
 	constructor(name, value)
 	{
@@ -9,4 +9,4 @@ class CommandArgument
 	}
 }
 
-module.exports = CommandArgument;
+module.exports = Variable;

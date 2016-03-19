@@ -5,19 +5,30 @@
 		</title>
 		
 		<script src="lib/primus/primus.js"></script>
+		<script src="commands/command-argument.js"></script>
+		<script src="commands/command.js"></script>
 		<script type="text/javascript">
+			var primus = Primus.connect("ws://localhost:3000");
+			
+			primus.on("connection", function () {
+				console.log("CONNECTY MESSAGE!");
+			});
+
+			primus.on("data", function (data) {
+				if (data.Symbol == "CONNECT_RESPONSE")
+					console.log("Connect response", data);
+				else if (data.Symbol == "POST_MESSAGE")
+					console.log("New message", data);
+				else
+					console.log("? data?", data);
+			});
+			
 			function WebSocketTest()
 			{
-				var primus = Primus.connect("ws://localhost:3000/api/authentication");
-
-				primus.on("open", function () {
-					console.log("OPENY MESSAGE!")
-				});
-
-				primus.on("data", function (data) {
-					console.log("GETTY MESSAGE");
-					console.log("data =", data)
-				});
+				let cmd = new Command("SEND_MESSAGE");
+				cmd.addArgument("RoomID", 101);
+				cmd.addArgument("Message", "Hello, cruel world");
+				primus.write({ Command: cmd });
 			}
 		</script>
 	</head>
