@@ -2,7 +2,9 @@
 
 let TS = require("../../diagnostics/trace-sources").Get("Web-Server");
 
-let Command = require("../command/command");
+let constants = require("../../resources/constants");
+
+let Message = require("../command/message");
 let ClientProxy = require("./client-proxy");
 
 class WebServer
@@ -142,18 +144,19 @@ class WebServer
 	{
 		let commandService = require("../command/command-service");
 		
-		let cmd = new Command("CONNECT");
-		let proxy = new ClientProxy(spark);
-		commandService.invoke(cmd, proxy);
 		spark.on('data', function(data) {
-			if (!data.Command)
+			if (!data.Message)
 			{
-				TS.TraceError(__filename, "Data received, but no command specified");
+				TS.TraceError(__filename, "Data received, but no message specified");
 				return;
 			}
-			let cmd = Command.fromJSON(data.Command);
+			let message = Message.fromJSON(data.Message);
 			commandService.invoke(cmd, proxy);
 		});
+		
+		let message = new Message(constants.Actions.Connect);
+		let proxy = new ClientProxy(spark);
+		commandService.invoke(message, proxy);
 	}
 	
 	onDisconnect(spark)
@@ -161,9 +164,9 @@ class WebServer
 		let chatService = require("../chat/chat-service");
 		let commandService = require("../command/command-service");
 		
-		let cmd = new Command("DISCONNECT");
+		let message = new Message(constants.Actions.Disconnect);
 		let proxy = chatService.findClient(spark.id);
-		commandService.invoke(cmd, proxy);
+		commandService.invoke(message, proxy);
 	}
 
 	onError(error)

@@ -10,22 +10,19 @@
 		<script type="text/javascript">
 			var primus = Primus.connect("ws://localhost:3000");
 			
+			console.log(primus);
+			
 			primus.on("connection", function () {
-				console.log("CONNECTY MESSAGE!");
+				console.log("CONNECTY!");
 			});
 
 			primus.on("data", function (data) {
-				if (data.Symbol == "CONNECT_RESPONSE")
-					console.log("Connect response", data);
-				else if (data.Symbol == "POST_MESSAGE")
-					console.log("New message", data);
-				else
-					console.log("? data?", data);
+				console.log("? data?", data);
 			});
 			
 			function WebSocketTest()
 			{
-				let cmd = new Command("SEND_MESSAGE");
+				let cmd = new Command("POST_MESSAGE");
 				cmd.addArgument("RoomID", 101);
 				cmd.addArgument("Message", "Hello, cruel world");
 				primus.write({ Command: cmd });

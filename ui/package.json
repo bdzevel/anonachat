@@ -1,0 +1,33 @@
+{
+  "name": "anonachat-ui",
+  "description": "UI built with React for Anonachat",
+  "version": "0.0.1",
+  "author": "bdzevel",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "echo 'Nothing to start'",
+    "postinstall": "grunt",
+    "build-dev": "browserify ./app.jsx -o ./dist/anonachat-ui-react.js",
+    "build": "browserify ./app.jsx | uglifyjs -cm -o ./dist/anonachat-ui-react.js"
+  },
+  "dependencies": {
+    "browserify": "^12.0.1",
+    "flux": "^2.1.1",
+    "grunt": "^0.4.5",
+    "grunt-bower-task": "^0.4.0",
+    "grunt-browserify": "^4.0.1",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-uglify": "^0.11.1",
+    "react": "^0.14.3",
+    "react-bootstrap": "^0.28.2",
+    "react-dom": "^0.14.3",
+    "reactify": "^1.1.1",
+    "uglify-js": "^2.6.1"
+  },
+  "browserify": {
+    "transform": [
+      "reactify"
+    ]
+  }
+}

@@ -2,8 +2,9 @@
 
 let TS = require("../../diagnostics/trace-sources").Get("Chat-Service");
 
-let Command = require("../command/command");
-let Response = require("../command/response");
+let constants = require("../../resources/constants").Chat;
+
+let Message = require("../command/message");
 
 class ChatService
 {
@@ -18,9 +19,9 @@ class ChatService
 	{
 		this.connectedClients = [ ];
 		this.commandService = require("../command/command-service");
-		this.commandService.register("CONNECT", this, this.registerConnection);
-		this.commandService.register("POST_MESSAGE", this, this.postMessage);
-		this.commandService.register("DISCONNECT", this, this.deregisterConnection);
+		this.commandService.register(constants.Actions.PostMessage, this, this.postMessage);
+		this.commandService.register(constants.Actions.Connect, this, this.registerConnection);
+		this.commandService.register(constants.Actions.Disconnect, this, this.deregisterConnection);
 	}
 	
 	findClient(id)
@@ -29,27 +30,46 @@ class ChatService
 		return client;
 	}
 	
-	registerConnection(command, context)
+	registerConnection(message, context)
 	{
 		context.setUserName(this.generateUnusedUserName());
 		this.connectedClients.push(context);
-		var response = new Response("CONNECT_RESPONSE");
-		response.addArgument("ConnectedClients", this.connectedClients);
+		this.notifyNewConnection(context);
+		var response = new Message(constants.Actions.ConnectResponse);
+		response.addParameter("ConnectedClients", this.connectedClients);
 		return response;
 	}
 	
-	postMessage(command, context)
+	notifyNewConnection(context)
 	{
-		let message = command.getArgument("Message");
-		this.connectedClients.forEach(function(client) { client.write({ ClientID: context.ID, Message: message }); });
-		return new Response("POST_MESSAGE_RESPONSE");
+		let message = new Message(constants.Actions.Connect);
+		message.addParameter("Client", context);
+		this.connectedClients.forEach(function(client) { client.write({ Message: message }) });
 	}
 	
-	deregisterConnection(command, context)
+	postMessage(message, context)
+	{
+		let msg = new Message(constants.Actions.PostMessage);
+		msg.addParameter("Message", message.getParameter("Message"));
+		msg.addParameter("Client", context);
+		msg.addParameter("DateTime", Date.now());
+		this.connectedClients.forEach(function(client) { client.write({ Message: msg }); });
+		return new Message(constants.Actions.PostMessageResponse);
+	}
+	
+	deregisterConnection(message, context)
 	{
 		this.connectedClients.remove(context);
 		this.freeUserName(context.UserName);
+		this.notifyDisconnection();
 		return null;
+	}
+	
+	notifyDisconnection(context)
+	{
+		let msg = new Message(constants.Actions.Disconnect);
+		msg.addParameter("Client", context);
+		this.connectedClients.forEach(function(client) { client.write({ Message: msg }) });
 	}
 	
 	generateUnusedUserName()

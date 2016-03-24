@@ -2,8 +2,7 @@
 
 let TS = require("../../diagnostics/trace-sources").Get("Command-Service");
 
-let Command = require("./command");
-let Response = require("./response");
+let Message = require("./message");
 let CommandHandler = require("./command-handler");
 
 class CommandService
@@ -22,31 +21,34 @@ class CommandService
 	
 	register(symbol, service, callback)
 	{
-		if (this.isCommandRegistered(symbol))
+		if (this.isMessageRegistered(symbol))
 		{
-			TS.TraceError(__filename, "Command '" + symbol + "' already registered");
+			TS.TraceError(__filename, "Message '" + symbol + "' already registered");
 			return;
 		}
 		let handler = new CommandHandler(symbol, service, callback);
 		this.commandHandlers.push(handler);
 	}
 	
-	invoke(command, context)
+	handle(message, context)
 	{
-		if (!(command instanceof Command))
-			throw "Invalid argument type for 'command'";
-		let handler = this.getHandler(command.Symbol);
-		if (!handler)
+		if (!(message instanceof Message))
 		{
-			TS.TraceVerbose(__filename, "No handler registered for command '" + command.Symbol + "'");
+			TS.TraceVerbose(__filename, "Invalid type for 'message'");
 			return;
 		}
-		let response = handler.Callback.call(handler.Service, command, context);
+		let handler = this.getHandler(message.Symbol);
+		if (!handler)
+		{
+			TS.TraceVerbose(__filename, "No handler registered for message '" + message.Symbol + "'");
+			return;
+		}
+		let response = handler.Callback.call(handler.Service, message, context);
 		if (response)
-			context.write(response);
+			context.write({ Message: response });
 	}
 	
-	isCommandRegistered(symbol)
+	isMessageRegistered(symbol)
 	{
 		if (this.getHandler(symbol))
 			return true;
@@ -55,8 +57,8 @@ class CommandService
 	
 	getHandler(symbol)
 	{
-		let cmd = this.commandHandlers.find(function(cmd) { return cmd.Symbol === symbol; });
-		return cmd;
+		let handler = this.commandHandlers.find(function(handler) { return handler.Symbol === symbol; });
+		return handler;
 	}
 }
 

@@ -1,0 +1,29 @@
+{
+  "name": "anonachat-ui",
+  "description": "UI built with React for Anonachat",
+  "main": "",
+  "authors": [
+    "bdzevel"
+  ],
+  "license": "MIT",
+  "moduleType": [
+    "node"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6"
+  },
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "dist/public/lib"
+  ],
+  "exportsOverride": {
+    "bootstrap": {
+      "css": "dist/css/bootstrap.min.css",
+	  "js": "dist/js/bootstrap.min.js",
+	  "fonts": "dist/fonts/*"
+	}
+  }
+}
