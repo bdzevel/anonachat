@@ -6,7 +6,7 @@ var AnonachatAppSpec =
 	render: function()
 	{
 		return (
-			<div className="anonachat-app">
+			<div className="container-fluid anonachat-app">
 				<Content />
 				<ChatForm />
 			</div>

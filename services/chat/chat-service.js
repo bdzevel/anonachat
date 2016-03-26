@@ -26,7 +26,7 @@ class ChatService
 	
 	findClient(id)
 	{
-		let client = this.connectedClients.find(function(client) { return client.ClientID === clientID; });
+		let client = this.connectedClients.find(function(client) { return client.ClientID === id; });
 		return client;
 	}
 	
@@ -59,9 +59,13 @@ class ChatService
 	
 	deregisterConnection(message, context)
 	{
-		this.connectedClients.remove(context);
+		let i = -1;
+		let client = this.connectedClients.find(function(client, index) { if (client === context) i = index; return client === context; });
+		if (i === -1)
+			return null;
+		this.connectedClients.splice(i, 1);
 		this.freeUserName(context.UserName);
-		this.notifyDisconnection();
+		this.notifyDisconnection(context);
 		return null;
 	}
 	
@@ -91,9 +95,11 @@ class ChatService
 	freeUserName(name)
 	{
 		let userNames = require("./user-names");
-		let userName = userNames.find(function(n) { return n === name; });
-		if (userName)
-			userNames.remove(userName);
+		let i = -1;
+		let userName = userNames.find(function(userName, index) { if (userName === name) i = index; return userName === name; });
+		if (i === -1)
+			return;
+		userNames.splice(i, 1);
 	}
 }
 

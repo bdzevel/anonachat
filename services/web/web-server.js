@@ -2,7 +2,7 @@
 
 let TS = require("../../diagnostics/trace-sources").Get("Web-Server");
 
-let constants = require("../../resources/constants");
+let constants = require("../../resources/constants").Chat;
 
 let Message = require("../command/message");
 let ClientProxy = require("./client-proxy");
@@ -150,13 +150,13 @@ class WebServer
 				TS.TraceError(__filename, "Data received, but no message specified");
 				return;
 			}
-			let message = Message.fromJSON(data.Message);
-			commandService.invoke(cmd, proxy);
+			let message = Message.fromJson(data.Message);
+			commandService.handle(message, proxy);
 		});
 		
 		let message = new Message(constants.Actions.Connect);
 		let proxy = new ClientProxy(spark);
-		commandService.invoke(message, proxy);
+		commandService.handle(message, proxy);
 	}
 	
 	onDisconnect(spark)
@@ -166,7 +166,7 @@ class WebServer
 		
 		let message = new Message(constants.Actions.Disconnect);
 		let proxy = chatService.findClient(spark.id);
-		commandService.invoke(message, proxy);
+		commandService.handle(message, proxy);
 	}
 
 	onError(error)

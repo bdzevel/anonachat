@@ -39,13 +39,21 @@ module.exports = function(grunt)
 				sourceMap: true,
 				sourceMapName: "dist/anonachat-ui-react.map"
 			}
+		},
+		copy:
+		{
+			app:
+			{
+				files: [ {expand: false, src: ["dist/anonachat-ui-react.js"], dest: "dist/public/anonachat-ui-react.js", filter: 'isFile'} ],
+			},
 		}
 	});
 
 	grunt.loadNpmTasks("grunt-bower-task");
 	grunt.loadNpmTasks("grunt-browserify");
-	grunt.loadNpmTasks("grunt-contrib-uglify");
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 
-	grunt.registerTask("default", ["bower", "browserify", "uglify"]);
+	grunt.registerTask("default", ["bower", "browserify", "uglify", "copy"]);
 	
 };

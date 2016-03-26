@@ -8,7 +8,7 @@ class Message
 		this.Parameters = [ ];
 	}
 	
-	static fromJSON(json)
+	static fromJson(json)
 	{
 		let msg = new Message(json.Symbol);
 		json.Parameters.forEach(function(parm) { msg.addParameter(parm.Name, parm.Value); }, this);

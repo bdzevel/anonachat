@@ -1,16 +1,10 @@
-var Row = require("react-bootstrap").Row;
-var Col = require("react-bootstrap").Col;
-var Grid = require("react-bootstrap").Grid;
 var Well = require("react-bootstrap").Well;
 var ListGroup = require("react-bootstrap").ListGroup;
 var ListGroupItem = require("react-bootstrap").ListGroupItem;
 
-var UserList = require("./user-list.jsx");
-var MessageBoard = require("./message-board.jsx");
-
 var chatStore = require("../stores/chat-store.js");
 
-var ContentSpec =
+var MessageBoardSpec =
 {
 	onPostMessage: function(message)
 	{
@@ -38,23 +32,17 @@ var ContentSpec =
 
 	render: function()
 	{
-		var me = this.state.me;
 		var chatMessages = this.state.chatMessages;
 		return (
-			<Grid fluid>
-				<Row>
-					<Col xs={12} sm={8}>
-						<MessageBoard />
-					</Col>
-					<Col xsHidden sm={4}>
-						<UserList />
-					</Col>
-				</Row>
-			</Grid>
+			<Well>
+				<ListGroup>
+					{ chatMessages.map(function(m, i) { return <ListGroupItem key={i}>[{m.DateTime.toLocaleString()}] <b>{m.User.UserName}</b>: {m.Message}</ListGroupItem>; }) }
+				</ListGroup>
+			</Well>
 		);
 	}
 };
 
 var React = require("react");
-var Content = React.createClass(ContentSpec);
-module.exports = Content;
+var MessageBoard = React.createClass(MessageBoardSpec);
+module.exports = MessageBoard;

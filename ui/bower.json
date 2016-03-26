@@ -10,6 +10,7 @@
     "node"
   ],
   "dependencies": {
+    "jquery": "~2.2.0",
     "bootstrap": "~3.3.6"
   },
   "private": true,
@@ -20,6 +21,9 @@
     "dist/public/lib"
   ],
   "exportsOverride": {
+    "jquery": {
+      "js": "dist/jquery.min.js"
+    },
     "bootstrap": {
       "css": "dist/css/bootstrap.min.css",
 	  "js": "dist/js/bootstrap.min.js",

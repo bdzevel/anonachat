@@ -1,14 +1,14 @@
 var Input = require("react-bootstrap").Input;
 var ButtonInput = require("react-bootstrap").ButtonInput;
 
-var ChatActions = require("../actions/chat-actions.js");
+var chatActions = require("../actions/chat-actions.js");
 
 var ChatFormSpec =
 {
 	PostMessage: function(e)
 	{
 		e.preventDefault();
-		ChatActions.PostMessage(this.state.message);
+		chatActions.PostMessage(this.state.message);
 		this.setState(this.getInitialState());
 	},
 

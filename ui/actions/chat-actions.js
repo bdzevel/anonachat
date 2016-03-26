@@ -5,17 +5,17 @@ var actions =
 {
 	Connect: function()
 	{
-		Dispatcher.dispatch({ Type: constants.Commands.Connect });
+		Dispatcher.dispatch({ Type: constants.Actions.Connect });
 	},
 
 	Disconnect: function()
 	{
-		Dispatcher.dispatch({ Type: constants.Commands.Disconnect });
+		Dispatcher.dispatch({ Type: constants.Actions.Disconnect });
 	},
 
 	PostMessage: function(message)
 	{
-		Dispatcher.dispatch({ Type: constants.Commands.PostMessage, Payload: message });
+		Dispatcher.dispatch({ Type: constants.Actions.PostMessage, Payload: message });
 	}
 };
 module.exports = actions;
