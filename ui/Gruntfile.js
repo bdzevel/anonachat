@@ -44,7 +44,11 @@ module.exports = function(grunt)
 		{
 			app:
 			{
-				files: [ {expand: false, src: ["dist/anonachat-ui-react.js"], dest: "dist/public/anonachat-ui-react.js", filter: 'isFile'} ],
+				files:
+				[
+					{ expand: false, src: ["dist/anonachat-ui-react.js"], dest: "dist/public/anonachat-ui-react.js", filter: 'isFile' },
+					{ expand: false, src: ["dist/anonachat-ui-react.js"], dest: "../public/anonachat-ui-react.js", filter: 'isFile' }
+				],
 			},
 		}
 	});
@@ -54,6 +58,6 @@ module.exports = function(grunt)
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-copy');
 
-	grunt.registerTask("default", ["bower", "browserify", "uglify", "copy"]);
+	grunt.registerTask("default", ["bower", "browserify", "copy"]);
 	
 };

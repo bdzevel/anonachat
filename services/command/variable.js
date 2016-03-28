@@ -1,5 +1,3 @@
-"use strict";
-
 class Variable
 {
 	constructor(name, value)

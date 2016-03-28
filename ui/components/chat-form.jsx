@@ -25,8 +25,8 @@ var ChatFormSpec =
 	render: function()
 	{
 		return (
-			<form onSubmit={this.PostMessage}>
-				<Input className="user-input" type="text" label="Message" value={this.state.message} onChange={this.HandleMessageChange} />
+			<form className={this.props.className} onSubmit={this.PostMessage}>
+				<Input type="text" label="Message" value={this.state.message} onChange={this.HandleMessageChange} />
 				<ButtonInput type="submit" value="Post" />
 			</form>
 		);

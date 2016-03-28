@@ -1,6 +1,8 @@
-var Well = require("react-bootstrap").Well;
-var ListGroup = require("react-bootstrap").ListGroup;
-var ListGroupItem = require("react-bootstrap").ListGroupItem;
+var $ = require("jquery");
+var Label = require("react-bootstrap").Label;
+
+var ChatMessageList = require("./chat-message-list.jsx");
+var ChatForm = require("./chat-form.jsx");
 
 var chatStore = require("../stores/chat-store.js");
 
@@ -13,8 +15,15 @@ var MessageBoardSpec =
 		let dateTime = new Date(message.getParameter("DateTime"));
 		this.state.chatMessages.push({ DateTime: dateTime, User: clientInfo, Message: chatMessage });
 		this.setState({ chatMessages: this.state.chatMessages });
+		this.scrollToBottom();
 	},
-
+	
+	scrollToBottom: function()
+	{
+		var list = $("#chat-message-list");
+		list.scrollTop(list.prop("scrollHeight"));
+	},
+	
 	componentDidMount: function()
 	{
 		chatStore.addPostMessageListener(this.onPostMessage);
@@ -32,13 +41,13 @@ var MessageBoardSpec =
 
 	render: function()
 	{
-		var chatMessages = this.state.chatMessages;
 		return (
-			<Well>
-				<ListGroup>
-					{ chatMessages.map(function(m, i) { return <ListGroupItem key={i}>[{m.DateTime.toLocaleString()}] <b>{m.User.UserName}</b>: {m.Message}</ListGroupItem>; }) }
-				</ListGroup>
-			</Well>
+			<div className="flexbox">
+				<Label bsStyle="primary">Messages</Label>
+				<ChatMessageList id="chat-message-list" className="scrollable"
+					chatMessages={this.state.chatMessages} />
+				<ChatForm className="footer" />
+			</div>
 		);
 	}
 };

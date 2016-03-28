@@ -1,5 +1,3 @@
-"use strict";
-
 let TS = require("../../diagnostics/trace-sources").Get("Command-Service");
 
 let Message = require("./message");

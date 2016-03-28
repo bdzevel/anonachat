@@ -1,11 +1,14 @@
-.error {
-    color: red;
+.flexbox {
+	height: 1000px;
+	display: flex;
+	flex-direction: column;
 }
 
-.content {
-	max-width: 1000px;
+.scrollable {
+	flex: 1 1 auto;
+	overflow-y: scroll;
 }
 
-.well {
-	max-width: 400px;
+#chat-message-list {
+	border-style: ridge;
 }

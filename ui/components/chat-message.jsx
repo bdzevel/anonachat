@@ -1,30 +1,15 @@
 var ListGroupItem = require("react-bootstrap").ListGroupItem;
 
-var MessageBoardSpec =
+var ChatMessageSpec =
 {
-	componentDidMount: function()
-	{
-		chatStore.addPostMessageListener(this.onPostMessage);
-	},
-
-	componentWillUnmount: function()
-	{
-		chatStore.removePostMessageListener(this.onPostMessage);
-	},
-
-	getInitialState: function()
-	{
-		return { chatMessages: [ ] };
-	},
-
 	render: function()
 	{
 		return (
-			<ListGroupItem key={i}>[{m.DateTime.toLocaleString()}] <b>{m.User.UserName}</b>: {m.Message}</ListGroupItem>
+			<ListGroupItem>[{this.props.DateTime.toLocaleString()}] <b>{this.props.UserName}</b>: {this.props.Message}</ListGroupItem>
 		);
 	}
 };
 
 var React = require("react");
-var MessageBoard = React.createClass(MessageBoardSpec);
-module.exports = MessageBoard;
+var ChatMessage = React.createClass(ChatMessageSpec);
+module.exports = ChatMessage;

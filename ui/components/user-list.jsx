@@ -1,4 +1,3 @@
-var Well = require("react-bootstrap").Well;
 var Label = require("react-bootstrap").Label;
 var ListGroup = require("react-bootstrap").ListGroup;
 var ListGroupItem = require("react-bootstrap").ListGroupItem;
@@ -10,14 +9,17 @@ var UserListSpec =
 	onUserConnect: function(message)
 	{
 		var client = message.getParameter("Client");
-		if (this.state.users.length === 0)
-			this.state.me = client;
+		if (this.findUser(client))
+			return;
 		this.state.users.push(client);
 		this.setState({ users: this.state.users });
 	},
 	
 	onConnectResponse: function(message)
 	{
+		var client = message.getParameter("Client");
+		if (!this.findUser(client))
+			this.state.users.push(client);
 		var clients = message.getParameter("ConnectedClients");
 		for (var i = 0; i < clients.length; i++) {
 			var client = clients[i];
@@ -25,7 +27,7 @@ var UserListSpec =
 				continue;
 			this.state.users.push(client);
 		}
-		this.setState({ users: this.state.users });
+		this.setState({ me: client, users: this.state.users });
 	},
 	
 	findUser: function(user)
@@ -70,12 +72,12 @@ var UserListSpec =
 		var me = this.state.me;
 		var users = this.state.users;
 		return (
-			<Well>
-				<Label>Users</Label>
+			<div className="flexbox">
+				<Label bsStyle="primary">Users</Label>
 				<ListGroup>
-					{ users.map(function(u) { if (u === me) return <ListGroupItem key={u.ClientID}><b>{u.UserName}</b></ListGroupItem>; else return <ListGroupItem key={u.ClientID}>{u.UserName}</ListGroupItem>; }) }
+					{ users.map(function(u) { if (me && me.ClientID === u.ClientID) return <ListGroupItem key={u.ClientID}><b>{u.UserName}</b></ListGroupItem>; else return <ListGroupItem key={u.ClientID}>{u.UserName}</ListGroupItem>; }) }
 				</ListGroup>
-			</Well>
+			</div>
 		);
 	}
 };

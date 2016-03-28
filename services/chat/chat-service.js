@@ -36,6 +36,7 @@ class ChatService
 		this.connectedClients.push(context);
 		this.notifyNewConnection(context);
 		var response = new Message(constants.Actions.ConnectResponse);
+		response.addParameter("Client", context);
 		response.addParameter("ConnectedClients", this.connectedClients);
 		return response;
 	}
@@ -79,7 +80,7 @@ class ChatService
 	generateUnusedUserName()
 	{
 		let adjectives = require("../../words/adjectives");
-		let nouns = require("../../words/nouns");
+		let nouns = require("../../words/animals");
 		let userNames = require("./user-names");
 		let userName = "";
 		do

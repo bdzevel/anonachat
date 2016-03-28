@@ -1,5 +1,3 @@
-"use strict";
-
 class CommandHandler
 {
 	constructor(symbol, service, callback)

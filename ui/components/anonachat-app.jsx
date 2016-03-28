@@ -1,5 +1,5 @@
+var NavBar = require("./navbar.jsx");
 var Content = require("./content.jsx");
-var ChatForm = require("./chat-form.jsx");
 
 var AnonachatAppSpec =
 {
@@ -7,8 +7,8 @@ var AnonachatAppSpec =
 	{
 		return (
 			<div className="container-fluid anonachat-app">
+				<NavBar />
 				<Content />
-				<ChatForm />
 			</div>
 		);
 	}
