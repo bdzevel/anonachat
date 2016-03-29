@@ -1,1 +1,1 @@
-web: node ./bin/www
+web: node --use_strict ./bin/www
