@@ -132,7 +132,7 @@ class WebServer
 	start()
 	{
 		let configurationService = require("../configuration/configuration-service");
-		const port = configurationService.get("PORT");
+		const port = process.env.PORT || configurationService.get("PORT");
 		TS.TraceVerbose(__filename, "Starting web server on port " + port);
 		this.webServer.listen(port);
 		TS.TraceVerbose(__filename, "Started web server");
