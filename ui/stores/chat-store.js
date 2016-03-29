@@ -37,6 +37,20 @@ ChatStore.prototype.postChatMessage = function(message)
 	this.writeMessage(msg);
 }
 
+ChatStore.prototype.joinRoom = function(name)
+{
+	let msg = new Message(constants.Actions.JoinChatRoom);
+	msg.addParameter("Room", name);
+	this.writeMessage(msg);
+}
+
+ChatStore.prototype.leaveRoom = function(name)
+{
+	let msg = new Message(constants.Actions.LeaveChatRoom);
+	msg.addParameter("Room", name);
+	this.writeMessage(msg);
+}
+
 ChatStore.prototype.addConnectListener = function(callback)
 {
 	this.on(constants.Actions.Connect, callback);
@@ -44,6 +58,15 @@ ChatStore.prototype.addConnectListener = function(callback)
 ChatStore.prototype.removeConnectListener = function(callback)
 {
 	this.removeListener(constants.Actions.Connect, callback);
+}
+
+ChatStore.prototype.addRoomChangeListener = function(callback)
+{
+	this.on(constants.Actions.JoinChatRoomResponse, callback);
+}
+ChatStore.prototype.removeRoomChangeListener = function(callback)
+{
+	this.removeListener(constants.Actions.JoinChatRoomResponse, callback);
 }
 
 ChatStore.prototype.addConnectResponseListener = function(callback)
@@ -99,6 +122,14 @@ function onAction(action)
 	else if (action.Type == constants.Actions.PostMessage)
 	{
 		store.postChatMessage(action.Payload);
+	}
+	else if (action.Type == constants.Actions.JoinChatRoom)
+	{
+		store.joinRoom(action.Payload);
+	}
+	else if (action.Type == constants.Actions.LeaveChatRoom)
+	{
+		store.leaveRoom(action.Payload);
 	}
 }
 

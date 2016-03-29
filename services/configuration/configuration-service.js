@@ -1,5 +1,3 @@
-"use strict";
-
 let TS = require("../../diagnostics/trace-sources").Get("Configuration-Service");
 
 class ConfigurationService

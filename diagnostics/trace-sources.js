@@ -1,5 +1,3 @@
-"use strict";
-
 let TraceSource = require("./trace-source");
 
 let TraceSources = { };

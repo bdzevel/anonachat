@@ -1,5 +1,3 @@
-"use strict";
-
 let TS = require("../diagnostics/trace-sources").Get("Bootstrapping");
 
 TS.TraceVerbose(__filename, "Initializing services...");

@@ -1,9 +1,8 @@
-"use strict";
-
 let TS = require("../../diagnostics/trace-sources").Get("Chat-Service");
 
 let constants = require("../../resources/constants").Chat;
 
+let ChatRoom = require("./chat-room");
 let Message = require("../command/message");
 
 class ChatService
@@ -17,64 +16,42 @@ class ChatService
 	
 	initialize()
 	{
-		this.connectedClients = [ ];
+		this.chatRooms = [ ];
+		this.allClients = [ ];
 		this.commandService = require("../command/command-service");
 		this.commandService.register(constants.Actions.PostMessage, this, this.postMessage);
 		this.commandService.register(constants.Actions.Connect, this, this.registerConnection);
 		this.commandService.register(constants.Actions.Disconnect, this, this.deregisterConnection);
+		this.commandService.register(constants.Actions.JoinChatRoom, this, this.joinChatRoom);
+		this.commandService.register(constants.Actions.LeaveChatRoom, this, this.leaveChatRoom);
 	}
 	
 	findClient(id)
 	{
-		let client = this.connectedClients.find(function(client) { return client.ClientID === id; });
+		let client = this.allClients.find(function(client) { return client.ClientID === id; });
 		return client;
+	}
+	
+	findRoomByName(name)
+	{
+		let room = this.chatRooms.find(function(room) { return room.RoomName === name; });
+		return room;
 	}
 	
 	registerConnection(message, context)
 	{
-		context.setUserName(this.generateUnusedUserName());
-		this.connectedClients.push(context);
-		this.notifyNewConnection(context);
-		var response = new Message(constants.Actions.ConnectResponse);
+		let newUserName = this.generateUnusedUserName();
+		context.setUserName(newUserName);
+		this.allClients.push(context);
+		
+		let roomName = this.getRoomName(message);
+		let room = this.ensureRoom(roomName);
+		room.connect(context);
+		
+		let response = new Message(constants.Actions.ConnectResponse);
 		response.addParameter("Client", context);
-		response.addParameter("ConnectedClients", this.connectedClients);
+		response.addParameter("ConnectedClients", room.ConnectedClients);
 		return response;
-	}
-	
-	notifyNewConnection(context)
-	{
-		let message = new Message(constants.Actions.Connect);
-		message.addParameter("Client", context);
-		this.connectedClients.forEach(function(client) { client.write({ Message: message }) });
-	}
-	
-	postMessage(message, context)
-	{
-		let msg = new Message(constants.Actions.PostMessage);
-		msg.addParameter("Message", message.getParameter("Message"));
-		msg.addParameter("Client", context);
-		msg.addParameter("DateTime", Date.now());
-		this.connectedClients.forEach(function(client) { client.write({ Message: msg }); });
-		return new Message(constants.Actions.PostMessageResponse);
-	}
-	
-	deregisterConnection(message, context)
-	{
-		let i = -1;
-		let client = this.connectedClients.find(function(client, index) { if (client === context) i = index; return client === context; });
-		if (i === -1)
-			return null;
-		this.connectedClients.splice(i, 1);
-		this.freeUserName(context.UserName);
-		this.notifyDisconnection(context);
-		return null;
-	}
-	
-	notifyDisconnection(context)
-	{
-		let msg = new Message(constants.Actions.Disconnect);
-		msg.addParameter("Client", context);
-		this.connectedClients.forEach(function(client) { client.write({ Message: msg }) });
 	}
 	
 	generateUnusedUserName()
@@ -93,6 +70,48 @@ class ChatService
 		return userName;
 	}
 	
+	getRoomName(message)
+	{
+		let room = message.getParameter("Room");
+		if (!room)
+			return "global";
+		return room.toLowerCase();
+	}
+	
+	ensureRoom(roomName)
+	{
+		let room = this.findRoomByName(roomName);
+		if (!room)
+		{
+			room = new ChatRoom(roomName);
+			this.chatRooms.push(room);
+		}
+		return room;
+	}
+	
+	postMessage(message, context)
+	{
+		let roomName = this.getRoomName(message);
+		let room = this.findRoomByName(roomName);
+		if (!room)
+			return;
+		let messageStr = message.getParameter("Message");
+		room.postMessage(messageStr, context);
+		return new Message(constants.Actions.PostMessageResponse);
+	}
+	
+	deregisterConnection(message, context)
+	{
+		let index = -1;
+		this.allClients.find(function(c, i) { if (c.ClientID === context.ClientID) index = i; return c.ClientID === context.ClientID; });
+		if (index === -1)
+			return null;
+		this.allClients.splice(index, 1);
+		this.freeUserName(context.UserName);
+		this.chatRooms.forEach(function(r) { r.disconnect(context); });
+		return null;
+	}
+	
 	freeUserName(name)
 	{
 		let userNames = require("./user-names");
@@ -101,6 +120,26 @@ class ChatService
 		if (i === -1)
 			return;
 		userNames.splice(i, 1);
+	}
+	
+	joinChatRoom(message, context)
+	{
+		let roomName = this.getRoomName(message);
+		let room = this.ensureRoom(roomName);
+		room.connect(context);
+		let response = new Message(constants.Actions.JoinChatRoomResponse);
+		response.addParameter("ConnectedClients", room.ConnectedClients);
+		return response;
+	}
+	
+	leaveChatRoom(message, context)
+	{
+		let roomName = this.getRoomName(message);
+		let room = this.findRoomByName(roomName);
+		if (!room)
+			return;
+		room.disconnect(context);
+		return new Message(constants.Actions.LeaveChatRoomResponse);
 	}
 }
 

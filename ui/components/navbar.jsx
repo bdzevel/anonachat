@@ -5,6 +5,7 @@ var Input = require("react-bootstrap").Input;
 var Button = require("react-bootstrap").Button;
 
 var chatStore = require("../stores/chat-store.js");
+var chatActions = require("../actions/chat-actions.js");
 
 var NavBarSpec =
 {
@@ -26,7 +27,21 @@ var NavBarSpec =
 	
 	getInitialState: function()
 	{
-		return { userName: "N/A" };
+		return { roomName: "global", currentRoomName: "global", userName: "N/A" };
+	},
+
+	HandleRoomNameChange: function(e)
+	{
+		this.setState({ roomName: e.target.value });
+	},
+	
+	ChangeRoom: function(e)
+	{
+		if (this.state.currentRoomName === this.state.roomName)
+			return;
+		chatActions.LeaveRoom(this.state.currentRoomName);
+		chatActions.JoinRoom(this.state.roomName);
+		this.setState({ currentRoomName: this.state.roomName });
 	},
 	
 	render: function()
@@ -41,8 +56,9 @@ var NavBarSpec =
 				</Navbar.Header>
 				<Navbar.Collapse>
 					<Navbar.Form pullLeft>
-						<Input type="text" placeholder="Join chatroom" />
-						<Button type="submit">Join</Button>
+						<Input type="text" placeholder="Room name" value={this.state.roomName} onChange={this.HandleRoomNameChange} />
+						{ " " }
+						<Button type="submit" onClick={this.ChangeRoom}>Join</Button>
 					</Navbar.Form>
 					<Navbar.Text pullRight>
 						Signed in as: {this.state.userName}

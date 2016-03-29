@@ -1,5 +1,3 @@
-"use strict";
-
 class ClientProxy
 {
 	constructor(spark)

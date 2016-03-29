@@ -24,13 +24,20 @@ var MessageBoardSpec =
 		list.scrollTop(list.prop("scrollHeight"));
 	},
 	
+	onRoomChange: function(message)
+	{
+		this.setState(this.getInitialState());
+	},
+	
 	componentDidMount: function()
 	{
+		chatStore.addRoomChangeListener(this.onRoomChange);
 		chatStore.addPostMessageListener(this.onPostMessage);
 	},
 
 	componentWillUnmount: function()
 	{
+		chatStore.removeRoomChangeListener(this.onRoomChange);
 		chatStore.removePostMessageListener(this.onPostMessage);
 	},
 

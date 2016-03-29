@@ -1,5 +1,3 @@
-"use strict";
-
 let TS = require("../../diagnostics/trace-sources").Get("Web-Server");
 
 let constants = require("../../resources/constants").Chat;

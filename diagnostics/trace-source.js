@@ -1,5 +1,3 @@
-"use strict";
-
 let Severity = require("./severity");
 
 function TraceSource(name)

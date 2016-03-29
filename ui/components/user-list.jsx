@@ -30,6 +30,13 @@ var UserListSpec =
 		this.setState({ me: client, users: this.state.users });
 	},
 	
+	onRoomChange: function(message)
+	{
+		this.state.users = [ ];
+		this.state.users.push(this.state.me);
+		this.setState({ users: this.state.users });
+	},
+	
 	findUser: function(user)
 	{
 		return this.state.users.find(function(u) { return u.ClientID === user.ClientID; });
@@ -51,6 +58,7 @@ var UserListSpec =
 		chatStore.addConnectListener(this.onUserConnect);
 		chatStore.addDisconnectListener(this.onUserDisconnect);
 		
+		chatStore.addRoomChangeListener(this.onRoomChange);
 		chatStore.addConnectResponseListener(this.onConnectResponse);
 	},
 
@@ -59,6 +67,7 @@ var UserListSpec =
 		chatStore.removeConnectListener(this.onUserConnect);
 		chatStore.removeDisconnectListener(this.onUserDisconnect);
 		
+		chatStore.removeRoomChangeListener(this.onRoomChange);
 		chatStore.removeConnectResponseListener(this.onConnectResponse);
 	},
 

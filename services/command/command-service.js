@@ -32,18 +32,23 @@ class CommandService
 	{
 		if (!(message instanceof Message))
 		{
-			TS.TraceVerbose(__filename, "Invalid type for 'message'");
+			TS.TraceError(__filename, "Invalid type for 'message'");
 			return;
 		}
+		TS.TraceVerbose(__filename, "Received " + message.Symbol);
 		let handler = this.getHandler(message.Symbol);
 		if (!handler)
 		{
-			TS.TraceVerbose(__filename, "No handler registered for message '" + message.Symbol + "'");
+			TS.TraceWarning(__filename, "No handler registered for message '" + message.Symbol + "'");
 			return;
 		}
 		let response = handler.Callback.call(handler.Service, message, context);
 		if (response)
+		{
+			TS.TraceVerbose(__filename, "Sending " + response.Symbol);
 			context.write({ Message: response });
+		}
+		TS.TraceVerbose(__filename, "Finished handling '" + message.Symbol + "'");
 	}
 	
 	isMessageRegistered(symbol)
