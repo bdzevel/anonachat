@@ -4,6 +4,8 @@ Anonachat
 An anonymous chat application application written in JavaScript, for practice.
 
 * Node.js is the back end
+* Engine.io with Primus used for web socket communication
+* ReactJS is the front end framework
 
 Authored by Boris Dzevel
 
@@ -29,5 +31,6 @@ Needs .env file at root (not checked in), with following (JSON) structure:
 
 	{
 		"ANONACHAT_ENVIRONMENT": "development/production",
-		"ANONACHAT_SSL_ENABLED": "0/1"
+		"ANONACHAT_SSL_ENABLED": "0/1",
+		"ANONACHAT_PORT": 3000
 	}
