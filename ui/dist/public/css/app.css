@@ -9,6 +9,10 @@
 	overflow-y: scroll;
 }
 
+.user-self {
+	color: darkblue;
+}
+
 #chat-message-list {
 	border-style: ridge;
 }

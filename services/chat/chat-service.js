@@ -128,6 +128,7 @@ class ChatService
 		let room = this.ensureRoom(roomName);
 		room.connect(context);
 		let response = new Message(constants.Actions.JoinChatRoomResponse);
+		response.addParameter("Room", roomName);
 		response.addParameter("ConnectedClients", room.ConnectedClients);
 		return response;
 	}

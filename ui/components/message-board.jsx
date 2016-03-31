@@ -15,35 +15,90 @@ var MessageBoardSpec =
 		let dateTime = new Date(message.getParameter("DateTime"));
 		this.state.chatMessages.push({ DateTime: dateTime, User: clientInfo, Message: chatMessage });
 		this.setState({ chatMessages: this.state.chatMessages });
+		this.sendNotification(clientInfo, chatMessage);
 		this.scrollToBottom();
+	},
+	
+	sendNotification: function(client, message)
+	{
+		if (!this.notificationsAllowed || this.state.me.ClientID === client.ClientID)
+			return;
+		let notification = new Notification(client.UserName + ": " + message);
 	},
 	
 	scrollToBottom: function()
 	{
-		var list = $("#chat-message-list");
+		let list = $("#chat-message-list");
 		list.scrollTop(list.prop("scrollHeight"));
 	},
 	
 	onRoomChange: function(message)
 	{
-		this.setState(this.getInitialState());
+		let roomName = message.getParameter("Room");
+		this.setState({ roomName: roomName, chatMessages: [ ] });
+	},
+	
+	onUserConnect: function(message)
+	{
+		var client = message.getParameter("Client");
+		this.state.chatMessages.push({ DateTime: new Date(Date.now()), Message: client.UserName + " joined..." });
+		this.setState({ chatMessages: this.state.chatMessages });
+	},
+
+	onUserDisconnect: function(message)
+	{
+		var client = message.getParameter("Client");
+		this.state.chatMessages.push({ DateTime: new Date(Date.now()), Message: client.UserName + " left..." });
+		this.setState({ chatMessages: this.state.chatMessages });
+	},
+	
+	onConnectResponse: function(message)
+	{
+		var client = message.getParameter("Client");
+		this.setState({ me: client });
 	},
 	
 	componentDidMount: function()
 	{
+		chatStore.addConnectListener(this.onUserConnect);
+		chatStore.addDisconnectListener(this.onUserDisconnect);
 		chatStore.addRoomChangeListener(this.onRoomChange);
 		chatStore.addPostMessageListener(this.onPostMessage);
+		chatStore.addConnectResponseListener(this.onConnectResponse);
+		
+		this.requestNotificationPermission();
+	},
+	
+	requestNotificationPermission: function()
+	{
+		this.notificationsAllowed = false;
+		var permission = Notification.permission;
+		if (!("Notification" in window) || permission === "denied")
+			return;
+		if (permission === "granted")
+		{
+			this.notificationsAllowed = true;
+		}
+		else
+		{
+			Notification.requestPermission().then(function (p) { permission = p; });
+			if (permission === "granted")
+				this.notificationsAllowed = true;
+		}
 	},
 
 	componentWillUnmount: function()
 	{
+		chatStore.removeConnectListener(this.onUserConnect);
+		chatStore.removeDisconnectListener(this.onUserDisconnect);
 		chatStore.removeRoomChangeListener(this.onRoomChange);
 		chatStore.removePostMessageListener(this.onPostMessage);
+		chatStore.removeConnectResponseListener(this.onConnectResponse);
 	},
 
 	getInitialState: function()
 	{
-		return { chatMessages: [ ] };
+		return { roomName: "global", chatMessages: [ ] };
 	},
 
 	render: function()
@@ -52,8 +107,9 @@ var MessageBoardSpec =
 			<div className="flexbox">
 				<Label bsStyle="primary">Messages</Label>
 				<ChatMessageList id="chat-message-list" className="scrollable"
-					chatMessages={this.state.chatMessages} />
-				<ChatForm className="footer" />
+					chatMessages={this.state.chatMessages}
+					me={this.state.me} />
+				<ChatForm className="footer" roomName={this.state.roomName} />
 			</div>
 		);
 	}

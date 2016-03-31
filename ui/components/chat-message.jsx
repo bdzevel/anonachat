@@ -5,7 +5,7 @@ var ChatMessageSpec =
 	render: function()
 	{
 		return (
-			<ListGroupItem>[{this.props.DateTime.toLocaleString()}] <b>{this.props.UserName}</b>: {this.props.Message}</ListGroupItem>
+			<ListGroupItem>[{this.props.DateTime.toLocaleString()}] <b className={this.props.IsSelf ? "user-self" : "user"}>{this.props.UserName}:</b> {this.props.Message}</ListGroupItem>
 		);
 	}
 };

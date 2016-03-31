@@ -1,5 +1,5 @@
 .flexbox {
-	height: 800px;
+	height: 1000px;
 	display: flex;
 	flex-direction: column;
 }
@@ -7,6 +7,10 @@
 .scrollable {
 	flex: 1 1 auto;
 	overflow-y: scroll;
+}
+
+.user-self {
+	color: darkblue;
 }
 
 #chat-message-list {

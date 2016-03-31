@@ -47,7 +47,7 @@ module.exports = function(grunt)
 				files:
 				[
 					{ expand: false, src: ["dist/anonachat-ui-react.js"], dest: "dist/public/anonachat-ui-react.js", filter: 'isFile' },
-					{ expand: false, src: ["dist/anonachat-ui-react.js"], dest: "../public/anonachat-ui-react.js", filter: 'isFile' }
+					{ expand: true, cwd: "dist/public", src: ["**"], dest: "../public" }
 				],
 			},
 		}

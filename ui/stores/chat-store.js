@@ -30,10 +30,11 @@ ChatStore.prototype.disconnect = function()
 	this.writeMessage(msg);
 }
 
-ChatStore.prototype.postChatMessage = function(message)
+ChatStore.prototype.postChatMessage = function(payload)
 {
 	let msg = new Message(constants.Actions.PostMessage);
-	msg.addParameter("Message", message);
+	msg.addParameter("Room", payload.RoomName);
+	msg.addParameter("Message", payload.Message);
 	this.writeMessage(msg);
 }
 

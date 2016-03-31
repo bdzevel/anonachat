@@ -5,14 +5,14 @@ var chatActions = require("../actions/chat-actions.js");
 
 var ChatFormSpec =
 {
-	PostMessage: function(e)
+	postMessage: function(e)
 	{
 		e.preventDefault();
-		chatActions.PostMessage(this.state.message);
+		chatActions.PostMessage(this.props.roomName, this.state.message);
 		this.setState(this.getInitialState());
 	},
 
-	HandleMessageChange: function(e)
+	handleMessageChange: function(e)
 	{
 		this.setState({ message: e.target.value });
 	},
@@ -25,8 +25,8 @@ var ChatFormSpec =
 	render: function()
 	{
 		return (
-			<form className={this.props.className} onSubmit={this.PostMessage}>
-				<Input type="text" label="Message" value={this.state.message} onChange={this.HandleMessageChange} />
+			<form className={this.props.className} onSubmit={this.postMessage}>
+				<Input type="text" label="Message" value={this.state.message} onChange={this.handleMessageChange} />
 				<ButtonInput type="submit" value="Post" />
 			</form>
 		);

@@ -13,9 +13,9 @@ var actions =
 		Dispatcher.dispatch({ Type: constants.Actions.Disconnect });
 	},
 
-	PostMessage: function(message)
+	PostMessage: function(roomName, message)
 	{
-		Dispatcher.dispatch({ Type: constants.Actions.PostMessage, Payload: message });
+		Dispatcher.dispatch({ Type: constants.Actions.PostMessage, Payload: { RoomName: roomName, Message: message } });
 	},
 
 	JoinRoom: function(roomName)

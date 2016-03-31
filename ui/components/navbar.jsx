@@ -30,18 +30,18 @@ var NavBarSpec =
 		return { roomName: "global", currentRoomName: "global", userName: "N/A" };
 	},
 
-	HandleRoomNameChange: function(e)
+	handleRoomNameChange: function(e)
 	{
 		this.setState({ roomName: e.target.value });
 	},
 	
-	HandleKeyPress: function(e)
+	handleKeyPress: function(e)
 	{
 		if (e.keyCode == 13)
-			this.ChangeRoom();
+			this.changeRoom();
 	},
 	
-	ChangeRoom: function(e)
+	changeRoom: function(e)
 	{
 		if (this.state.currentRoomName === this.state.roomName)
 			return;
@@ -62,9 +62,9 @@ var NavBarSpec =
 				</Navbar.Header>
 				<Navbar.Collapse>
 					<Navbar.Form pullLeft>
-						<Input type="text" placeholder="Room name" value={this.state.roomName} onChange={this.HandleRoomNameChange} onKeyDown={this.HandleKeyPress} />
+						<Input type="text" placeholder="Room name" value={this.state.roomName} onChange={this.handleRoomNameChange} onKeyDown={this.handleKeyPress} />
 						{ " " }
-						<Button type="submit" onClick={this.ChangeRoom}>Join</Button>
+						<Button type="submit" onClick={this.changeRoom}>Join</Button>
 					</Navbar.Form>
 					<Navbar.Text pullRight>
 						Signed in as: {this.state.userName}
