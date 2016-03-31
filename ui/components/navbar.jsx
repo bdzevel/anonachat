@@ -35,6 +35,12 @@ var NavBarSpec =
 		this.setState({ roomName: e.target.value });
 	},
 	
+	HandleKeyPress: function(e)
+	{
+		if (e.keyCode == 13)
+			this.ChangeRoom();
+	},
+	
 	ChangeRoom: function(e)
 	{
 		if (this.state.currentRoomName === this.state.roomName)
@@ -56,7 +62,7 @@ var NavBarSpec =
 				</Navbar.Header>
 				<Navbar.Collapse>
 					<Navbar.Form pullLeft>
-						<Input type="text" placeholder="Room name" value={this.state.roomName} onChange={this.HandleRoomNameChange} />
+						<Input type="text" placeholder="Room name" value={this.state.roomName} onChange={this.HandleRoomNameChange} onKeyDown={this.HandleKeyPress} />
 						{ " " }
 						<Button type="submit" onClick={this.ChangeRoom}>Join</Button>
 					</Navbar.Form>

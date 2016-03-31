@@ -34,6 +34,13 @@ var UserListSpec =
 	{
 		this.state.users = [ ];
 		this.state.users.push(this.state.me);
+		var clients = message.getParameter("ConnectedClients");
+		for (var i = 0; i < clients.length; i++) {
+			var client = clients[i];
+			if (this.findUser(client))
+				continue;
+			this.state.users.push(client);
+		}
 		this.setState({ users: this.state.users });
 	},
 	

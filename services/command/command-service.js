@@ -15,6 +15,7 @@ class CommandService
 	initialize()
 	{
 		this.commandHandlers = [ ];
+		this.configurationService = require("../configuration/configuration-service");
 	}
 	
 	register(symbol, service, callback)
@@ -35,7 +36,8 @@ class CommandService
 			TS.TraceError(__filename, "Invalid type for 'message'");
 			return;
 		}
-		TS.TraceVerbose(__filename, "Received " + message.Symbol);
+		if (this.configurationService.get("ENVIRONMENT") === "development")
+			TS.TraceVerbose(__filename, "Received " + message.Symbol);
 		let handler = this.getHandler(message.Symbol);
 		if (!handler)
 		{
@@ -45,10 +47,12 @@ class CommandService
 		let response = handler.Callback.call(handler.Service, message, context);
 		if (response)
 		{
-			TS.TraceVerbose(__filename, "Sending " + response.Symbol);
+			if (this.configurationService.get("ENVIRONMENT") === "development")
+				TS.TraceVerbose(__filename, "Sending " + response.Symbol);
 			context.write({ Message: response });
 		}
-		TS.TraceVerbose(__filename, "Finished handling '" + message.Symbol + "'");
+		if (this.configurationService.get("ENVIRONMENT") === "development")
+			TS.TraceVerbose(__filename, "Finished handling '" + message.Symbol + "'");
 	}
 	
 	isMessageRegistered(symbol)
