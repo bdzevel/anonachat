@@ -21,7 +21,7 @@ var MessageBoardSpec =
 	
 	sendNotification: function(client, message)
 	{
-		if (!this.notificationsAllowed || this.state.me.ClientID === client.ClientID)
+		if (!this.notificationsAllowed || !document.hidden || this.state.me.ClientID === client.ClientID)
 			return;
 		let notification = new Notification(client.UserName + ": " + message);
 	},
