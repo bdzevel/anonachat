@@ -301,7 +301,6 @@ var ChatForm = require("./chat-form.jsx");
 var notificationActions = require("../actions/notification-actions.js");
 
 var chatStore = require("../stores/chat-store.js");
-var notificationStore = require("../stores/notification-store.js");
 
 var MessageBoardSpec =
 {
@@ -318,7 +317,8 @@ var MessageBoardSpec =
 	
 	sendNotification: function(client, message)
 	{
-		if (!this.notificationsAllowed || !document.hidden || !notificationStore.IsEnabled() || this.state.me.ClientID === client.ClientID)
+		// We only want to send notifications if the window is not active and for other users' posts
+		if (!document.hidden || this.state.me.ClientID === client.ClientID)
 			return;
 		notificationActions.SendNotification(client.UserName + ": " + message);
 	},
@@ -362,26 +362,6 @@ var MessageBoardSpec =
 		chatStore.addRoomChangeListener(this.onRoomChange);
 		chatStore.addPostMessageListener(this.onPostMessage);
 		chatStore.addConnectResponseListener(this.onConnectResponse);
-		
-		this.requestNotificationPermission();
-	},
-	
-	requestNotificationPermission: function()
-	{
-		this.notificationsAllowed = false;
-		var permission = Notification.permission;
-		if (!("Notification" in window) || permission === "denied")
-			return;
-		if (permission === "granted")
-		{
-			this.notificationsAllowed = true;
-		}
-		else
-		{
-			Notification.requestPermission().then(function (p) { permission = p; });
-			if (permission === "granted")
-				this.notificationsAllowed = true;
-		}
 	},
 
 	componentWillUnmount: function()
@@ -417,7 +397,7 @@ var MessageBoard = React.createClass(MessageBoardSpec);
 module.exports = MessageBoard;
 
 
-},{"../actions/notification-actions.js":5,"../stores/chat-store.js":432,"../stores/notification-store.js":433,"./chat-form.jsx":8,"./chat-message-list.jsx":9,"jquery":86,"react":427,"react-bootstrap":236}],13:[function(require,module,exports){
+},{"../actions/notification-actions.js":5,"../stores/chat-store.js":432,"./chat-form.jsx":8,"./chat-message-list.jsx":9,"jquery":86,"react":427,"react-bootstrap":236}],13:[function(require,module,exports){
 var Nav = require("react-bootstrap").Nav;
 var Navbar = require("react-bootstrap").Navbar;
 var NavItem = require("react-bootstrap").NavItem;
@@ -53862,14 +53842,13 @@ module.exports = store;
 
 
 },{"../../resources/constants.js":1,"../../services/command/message.js":2,"../dispatcher/dispatcher.js":16,"../lib/primus/primus":17,"events":84}],433:[function(require,module,exports){
-var Primus = require("../lib/primus/primus");
 var EventEmitter = require("events").EventEmitter;
-var Message = require("../../services/command/message.js");
 var constants = require("../../resources/constants.js").Notification;
 
 function NotificationStore()
 {
 	this.enabled = true;
+	this.requestPermission();
 	
 	this.dispatcher = require("../dispatcher/dispatcher.js");
 	this.dispatcher.register(onAction);
@@ -53878,14 +53857,34 @@ NotificationStore.prototype = new EventEmitter();
 
 NotificationStore.prototype.send = function(message)
 {
+	if (!this.enabled || !this.permissionGranted())
+		return;
 	let notification = new Notification(message);
-	this.emit(constants.Actions.Send, this.enabled);
+	this.emit(constants.Actions.Send, this.message);
 }
 
 NotificationStore.prototype.toggle = function(bool)
 {
 	this.enabled = bool;
 	this.emit(constants.Actions.Toggle, this.enabled);
+}
+
+NotificationStore.prototype.requestPermission = function()
+{
+	if (!("Notification" in window))
+		return;
+	if (Notification.permission === "granted" || Notification.permission === "denied")
+		return;
+	Notification.requestPermission();
+}
+
+NotificationStore.prototype.permissionGranted = function()
+{
+	if (!("Notification" in window))
+		return false;
+	if (Notification.permission === "granted")
+		return true;
+	return false;
 }
 
 NotificationStore.prototype.IsEnabled = function()
@@ -53928,4 +53927,4 @@ function onAction(action)
 module.exports = store;
 
 
-},{"../../resources/constants.js":1,"../../services/command/message.js":2,"../dispatcher/dispatcher.js":16,"../lib/primus/primus":17,"events":84}]},{},[6]);
+},{"../../resources/constants.js":1,"../dispatcher/dispatcher.js":16,"events":84}]},{},[6]);

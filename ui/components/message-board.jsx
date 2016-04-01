@@ -7,7 +7,6 @@ var ChatForm = require("./chat-form.jsx");
 var notificationActions = require("../actions/notification-actions.js");
 
 var chatStore = require("../stores/chat-store.js");
-var notificationStore = require("../stores/notification-store.js");
 
 var MessageBoardSpec =
 {
@@ -24,7 +23,8 @@ var MessageBoardSpec =
 	
 	sendNotification: function(client, message)
 	{
-		if (!this.notificationsAllowed || !document.hidden || !notificationStore.IsEnabled() || this.state.me.ClientID === client.ClientID)
+		// We only want to send notifications if the window is not active and for other users' posts
+		if (!document.hidden || this.state.me.ClientID === client.ClientID)
 			return;
 		notificationActions.SendNotification(client.UserName + ": " + message);
 	},
@@ -68,26 +68,6 @@ var MessageBoardSpec =
 		chatStore.addRoomChangeListener(this.onRoomChange);
 		chatStore.addPostMessageListener(this.onPostMessage);
 		chatStore.addConnectResponseListener(this.onConnectResponse);
-		
-		this.requestNotificationPermission();
-	},
-	
-	requestNotificationPermission: function()
-	{
-		this.notificationsAllowed = false;
-		var permission = Notification.permission;
-		if (!("Notification" in window) || permission === "denied")
-			return;
-		if (permission === "granted")
-		{
-			this.notificationsAllowed = true;
-		}
-		else
-		{
-			Notification.requestPermission().then(function (p) { permission = p; });
-			if (permission === "granted")
-				this.notificationsAllowed = true;
-		}
 	},
 
 	componentWillUnmount: function()

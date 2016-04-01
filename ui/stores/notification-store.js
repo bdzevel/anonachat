@@ -1,11 +1,10 @@
-var Primus = require("../lib/primus/primus");
 var EventEmitter = require("events").EventEmitter;
-var Message = require("../../services/command/message.js");
 var constants = require("../../resources/constants.js").Notification;
 
 function NotificationStore()
 {
 	this.enabled = true;
+	this.requestPermission();
 	
 	this.dispatcher = require("../dispatcher/dispatcher.js");
 	this.dispatcher.register(onAction);
@@ -14,14 +13,34 @@ NotificationStore.prototype = new EventEmitter();
 
 NotificationStore.prototype.send = function(message)
 {
+	if (!this.enabled || !this.permissionGranted())
+		return;
 	let notification = new Notification(message);
-	this.emit(constants.Actions.Send, this.enabled);
+	this.emit(constants.Actions.Send, this.message);
 }
 
 NotificationStore.prototype.toggle = function(bool)
 {
 	this.enabled = bool;
 	this.emit(constants.Actions.Toggle, this.enabled);
+}
+
+NotificationStore.prototype.requestPermission = function()
+{
+	if (!("Notification" in window))
+		return;
+	if (Notification.permission === "granted" || Notification.permission === "denied")
+		return;
+	Notification.requestPermission();
+}
+
+NotificationStore.prototype.permissionGranted = function()
+{
+	if (!("Notification" in window))
+		return false;
+	if (Notification.permission === "granted")
+		return true;
+	return false;
 }
 
 NotificationStore.prototype.IsEnabled = function()
