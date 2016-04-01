@@ -16,6 +16,14 @@ var constants =
 			JoinChatRoomResponse: "CHAT.RESPONSE.JOIN_ROOM",
 			LeaveChatRoomResponse: "CHAT.RESPONSE.LEAVE_ROOM"
 		}
+	},
+	Notification:
+	{
+		Actions:
+		{
+			Send: "NOTIFICATION.COMMAND.SEND",
+			Toggle: "NOTIFICATION.COMMAND.TOGGLE"
+		}
 	}
 }
 

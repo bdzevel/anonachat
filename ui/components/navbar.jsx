@@ -4,8 +4,11 @@ var NavItem = require("react-bootstrap").NavItem;
 var Input = require("react-bootstrap").Input;
 var Button = require("react-bootstrap").Button;
 
-var chatStore = require("../stores/chat-store.js");
 var chatActions = require("../actions/chat-actions.js");
+var notificationActions = require("../actions/notification-actions.js");
+
+var chatStore = require("../stores/chat-store.js");
+var notificationStore = require("../stores/notification-store.js");
 
 var NavBarSpec =
 {
@@ -27,7 +30,7 @@ var NavBarSpec =
 	
 	getInitialState: function()
 	{
-		return { roomName: "global", currentRoomName: "global", userName: "N/A" };
+		return { roomName: "global", currentRoomName: "global", notificationsEnabled: notificationStore.IsEnabled(), userName: "N/A" };
 	},
 
 	handleRoomNameChange: function(e)
@@ -50,6 +53,12 @@ var NavBarSpec =
 		this.setState({ currentRoomName: this.state.roomName });
 	},
 	
+	toggleNotifications: function(e)
+	{
+		this.setState({ notificationsEnabled: e.target.checked });
+		notificationActions.ToggleNotifications(e.target.checked);
+	},
+	
 	render: function()
 	{
 		var navBar = (
@@ -65,6 +74,8 @@ var NavBarSpec =
 						<Input type="text" placeholder="Room name" value={this.state.roomName} onChange={this.handleRoomNameChange} onKeyDown={this.handleKeyPress} />
 						{ " " }
 						<Button type="submit" onClick={this.changeRoom}>Join</Button>
+						{ " " }
+						<Input type="checkbox" label="Enable chat notifications" checked={this.state.notificationsEnabled} onChange={this.toggleNotifications} />
 					</Navbar.Form>
 					<Navbar.Text pullRight>
 						Signed in as: {this.state.userName}

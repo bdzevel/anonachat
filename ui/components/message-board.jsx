@@ -4,7 +4,10 @@ var Label = require("react-bootstrap").Label;
 var ChatMessageList = require("./chat-message-list.jsx");
 var ChatForm = require("./chat-form.jsx");
 
+var notificationActions = require("../actions/notification-actions.js");
+
 var chatStore = require("../stores/chat-store.js");
+var notificationStore = require("../stores/notification-store.js");
 
 var MessageBoardSpec =
 {
@@ -21,9 +24,9 @@ var MessageBoardSpec =
 	
 	sendNotification: function(client, message)
 	{
-		if (!this.notificationsAllowed || !document.hidden || this.state.me.ClientID === client.ClientID)
+		if (!this.notificationsAllowed || !document.hidden || !notificationStore.IsEnabled() || this.state.me.ClientID === client.ClientID)
 			return;
-		let notification = new Notification(client.UserName + ": " + message);
+		notificationActions.SendNotification(client.UserName + ": " + message);
 	},
 	
 	scrollToBottom: function()
